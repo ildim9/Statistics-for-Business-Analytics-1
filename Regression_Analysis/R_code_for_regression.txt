@@ -1,0 +1,479 @@
+
+getwd()
+
+setwd("C:\\Users\\elgr9\\OneDrive\\Desktop\\Assignment 2 (LAB)-20211213")
+
+# QUESTION 1
+usdata <- read.table("C:\\Users\\elgr9\\OneDrive\\Desktop\\Assignment 2 (LAB)-20211213\\usdata")
+
+View(usdata)
+
+str(usdata)
+
+sum(is.na(usdata)) # no na's in the dataset 
+sum(is.null(usdata)) # no null's in the dataset 
+
+
+#QUESTION 2
+# updating the labels of the usdata for better explanation in question 2
+usdata$PRICE <- as.numeric(usdata$PRICE)
+usdata$SQFT <- as.numeric(usdata$SQFT)
+usdata$AGE <- as.numeric(usdata$AGE)
+usdata$FEATS <- as.numeric(usdata$FEATS)
+
+usdata$NE <- as.factor(usdata$NE)
+usdata$COR <- as.factor(usdata$COR)
+
+usdata$NE <- factor(usdata$NE,levels=c(0,1),labels=c('no','yes'))
+usdata$COR <- factor(usdata$COR,levels=c(0,1),labels=c('no','yes'))
+
+
+
+
+
+
+str(usdata)
+
+
+#QUESTION 3 
+
+
+library(psych)
+
+#for numeric variables
+
+data1 <- sapply(usdata,class)=='numeric' # we import in a new variable the numeric only as TRUE 
+
+usdata1 <- usdata[,data1] # so our new data with the numeric variables only is the usdata1
+head(usdata1,5)
+
+round(t(describe(usdata1)),1)
+
+
+# Visualization for Numerics 
+par(mfrow=c(2,3))
+n <- nrow(usdata1)
+hist(usdata1[,1], main=names(usdata1)[1],xlab="Usd")
+hist(usdata1[,2], main=names(usdata1)[2],xlab="Square Feet")
+hist(usdata1[,3], main=names(usdata1)[3],xlab='Age of home in years')
+hist(usdata1[,4], main=names(usdata1)[4],xlab="House Features")
+
+
+#for factors
+
+table(usdata$NE) # we have 39 real estates are located in northeast sector of the city and 24 arent located 
+
+table(usdata$COR) # we have 14 real estates that are in cornan location and 49 that they dont 
+
+# we can also show the prop of the upper tables with the prop.table function 
+
+round(prop.table(table(usdata$NE)),2) # finally the 62% of the real estates belong to northeast sector and 38% they dont 
+
+round(prop.table(table(usdata$COR)),2) # finally the 22% of the real estates are in cornen location and the 78% they dont 
+
+
+# visualization of the factor variables using the barplot to from the lecture 
+
+only_factors <- usdata[,!data1]
+par(mfrow=c(1,1))
+barplot(sapply(only_factors,table)/n, horiz=T, las=1, col=7:8, ylim=c(0,8), cex.names=1.3)
+legend('center', fil=7:8, legend=c('no','yes'), ncol=2, bty='o',cex=1.5)
+
+
+# OUTPUT FOR EVERY VARIABLE 
+
+# PRICE : WE SEE THAT THE PRICE VARIABLE HAS 1158.4 MEAN AND 1049 MEDIAN , THE SKEWNESS IS POSSITIVE BECAUSE A LOT OF THE OBSERVETAION ARE RIGHT OF THE DISTRIBUTION 
+
+# SQFT : WE SEE THAT THE MEAN SQEARE FEET OF THE REAL ESTATES IS 1729 SQ, the most of the real estates has 1500 to 2000 sq feet as we observe the histogram.
+
+# AGE : WE SEE THAT THE MEAN OF THE HOUSES'S AGE IS 17.5 AND OBSERVING THE DIAGRAM WE CAN SEE THAT THE MOST HOUSES ARE BETWEEN 25 TO 30 YEARS OLD, THE MEDIAN IS VERY LOW ( IN COMPARISSON WITH  THE MEAN ) THAT MEANS THAT THE OBSERVATION ARE POSSIBLY RANDOM DISTRIBUTED
+
+# FEATS : AS FAS AS THE FEATS OBSERVATIONS ARE CONSERNET WE SEE THAT IN 63 OBSERVATIONS THE MEAN IS 4 AND THE MEDIAN 4 THAT MEANS THAT THE FEATS ARE MORE OR LESS EVENLY DISTRIBUTEED
+# FEATS  : WE SEE THAT THE MOST OF THE HOUSES HAVE 3-4 FEATURES AND A VERY SMALL NUMBER OF HOUSES HAVE 7-8 FEATURES 
+
+
+# GIA COR KAI NAI TA EXW PEI PANW 
+
+
+# QUESTION 4 
+
+#for numeric variables
+
+
+par(mfrow=c(1,3))
+for(j in 2:4){
+  plot(usdata1[,1]~usdata1[,j], xlab=names(usdata1)[j], ylab='Price',cex.lab=1.5) # sxesis ana 2 !!
+  abline(lm(usdata1[,1]~usdata1[,j]),col=2)
+}
+
+
+# by seen the plots we can observe a perfect positive linear correlation between The price of 
+#the house and the Squeare Feet(as the dots are laying in the lm line) , for the variables AGE and FEATS we can say that
+#they do not have a good linear correlation with the Price Variable 
+
+# for factor variables 
+
+
+# the factor variables can be easily described by visualize them with box plot instead of plots as the numeric 
+
+
+par(mfrow=c(1,2))
+boxplot(usdata$PRICE~usdata$NE,xlab="NE",ylab="Price",col=c(4:5))
+
+boxplot(usdata$PRICE~usdata$COR,xlab ="COR",ylab="Price",col=c(7:8))
+
+#Correlation Plots for numeric variables 
+
+
+
+cor(usdata1)
+
+require(corrplot)
+
+corrplot(cor(usdata1),method="number")
+
+# RESULTS
+
+#strong linear correlation for sq ft and price ( logical )
+# negative linear correlation for sq ft ~ age , price ~ age 
+# medium linear correlation for price ~ feats,sq ft ~ feats 
+
+# is there a linear relationship between price and any other variables ? 
+
+# to answer it surely we have to build a corr-plot but with other "method"
+
+
+
+corrplot(cor(usdata1),method ="circle")
+
+
+# so yes the linear relationship is with the sqft variable 
+
+
+# QUESTION 5 
+
+
+full_model <- lm(PRICE~.,usdata)
+
+summary(full_model)
+
+
+# The first thing that we notice is that the R^2 is very high, thats good cause the higher the R^2 the better the model fits to data
+# also the adj R^2 square is very high that means that our variables in the model are not useless at all , the most useful variables we put to the model the higher the adj r^2 should be 
+#all the variables are statisticaly significant 
+# BUT we don't like the high negative value of the intercept , maybe we have to find a way to reduce it or to get rid of it 
+
+
+
+# QUESTION 6 
+
+
+final_model<-step(full_model, direction='both')
+
+
+
+
+#using MASS library to check and how other packages work 
+#step.model <- stepAIC(full_model, direction = "both", trace = TRUE)
+#summary(step.model)
+
+
+#analytically we will do a step wise procedure for both directions (forward and backwards at the same time).
+
+# w start from the full model and literately we add of remove variables 
+# firstly the algorithm removes the NE variable and as a result the AIC decreases 
+# secondly the algorithm removes also the the less significant variable AGE and as a result the AIC decreases  even more 
+#thirdly the algorithm removes again the less significant variable COR and as a result the AIC decreases  and stops its procedure 
+# we end up we the best model with a 2 COEFFICIENTS ( SQFT,FEATS ) and with a reduced intercept than the full model in QUESTION 5 ( more pleasing to us ) 
+
+
+# QUESTION 7 
+
+
+summary(final_model)
+
+# our intercept is statisticaly significant at a 0.01 significant level.
+
+
+#lm(formula = PRICE ~ SQFT + FEATS, data = usdata)
+
+
+#Comment of the final model out put and interpret the coefficients 
+
+# After the stepwise procedure we end up with our final model which is price= -175.92+0.68046*SQFT+39.83687*FEATS + ε, where ε ~Ν(0,143.7^2)
+# all our coefficients are statisticaly significant 
+
+# Comment of the intercept and the SQFT AND FEATS 
+
+# Intercept = - 175.92, that means that if we remove all the coefficients of the house then the price of the house will be -175.92 , thats not logical
+# so dispite that the coefficients are statisticaly significant we may need to remove the intercept 
+
+
+# SQFT = 0.68046 , that means that if the real estate will be increased by 1 square foot, the price of the house will be increased by 0.68 units(Hundreds follars)
+
+# FEATS=39.83 , that means that an  add of one feature in the house , the price of the house will be increased by 39.83 (Hundreds Dollars)
+
+# as we said above, the negative intercept of our model doesn't make any sense , in the explanation of the intercept we assume that if the sqft = 0 that's also a not right assumption because a house will never has a 0 sqft
+
+
+# LETS TRY TO REMOVE THE INTERSEPT FROM OUR FINAL MODEL 
+
+
+no_intercept_model <- lm(PRICE~.-1,usdata)
+
+summary(no_intercept_model)
+
+step_no_intercept_model<-step(no_intercept_model,direction = "both")
+
+summary(step_no_intercept_model)
+
+#after running the summary in the model with no_intercept we see a huge adj R-squared 
+#that a miscalculation by R so we will recalculate it with the proper formula below
+
+
+true.r2 <- 1-sum(step_no_intercept_model$res^2)/((nrow(usdata)-1)*var(usdata$PRICE))
+true.r2 #(0.8704843)
+
+#EXPLANATION WHY WE DONT REMOVE THE INTERCEPT EVENTUALLY
+
+#Firstly,we have to take in mind the significance of the intercept in our full model.
+#Also as we observe the adj r^2 from the model with the the intercept is getting decreased
+#if we remove it, that's not a good indicator because we understand that the change of  a good fit of our model also decreased.
+
+
+#Of course the negative price of the intercept doesn't seem so nice so will try to change it by using the centered covariates
+
+centered_covariates <- as.data.frame(scale(usdata1, center = TRUE, scale = F))
+centered_covariates$PRICE<-usdata1$PRICE
+
+sapply(centered_covariates,mean)
+sapply(centered_covariates,sd)
+round(sapply(centered_covariates,mean),2)
+round(sapply(centered_covariates,sd),2)
+
+class(centered_covariates)
+centered_covariates_model<-lm(PRICE~., centered_covariates)
+
+class(centered_covariates_model)
+summary(centered_covariates_model)
+
+
+# we see that the centered covariates seems to be a better fit for our model 
+
+#STEPWISE PROSIDURE FOR THE CENTER_COVARIETED_MODEL
+
+step_centered_model_final <- step(centered_covariates_model,direction = "both")
+class(step_centered_model_final)
+summary(step_centered_model_final)
+
+
+
+#Analysis of the centered model 
+
+# we observe that the price for buying a house with average characteristics will be 1.158 (in Hundreds Dollars)
+# the average characteristics are showed below 
+
+mean(usdata1$FEATS) # 3.952381 ~ 4 features 
+mean(usdata1$SQFT) # 1729.54 ~ Size 1729.54 sqft
+
+
+
+
+
+
+
+#QUESTION 8 
+
+#NORMALLITY OF THE RESIDUALS
+
+
+plot(step_centered_model_final,which = 2)
+
+
+require(nortest)
+
+lillie.test(step_centered_model_final$residuals)
+
+shapiro.test(step_centered_model_final$residuals)
+
+
+#in both test pvalue is very large so we don't reject normality on residuals
+
+
+#LINEARITY 
+
+
+require(car)
+
+par(mfrow=c(1,1))
+
+residualPlot(step_centered_model_final,type='rstudent')
+residualPlots(step_centered_model_final,plot=F,type='rstudent')
+
+
+# linearity violated
+
+#HOMOSCEDASITY 
+
+Stud.residuals <- rstudent(step_centered_model_final)
+yhat <- fitted(step_centered_model_final)
+par(mfrow=c(1,2))
+plot(yhat, Stud.residuals)# observing the plots we see that oute of the dotted lines there are observations , that means we proppbaly do not have a constant variance 
+abline(h=c(-2,2), col=2, lty=2)
+plot(yhat, Stud.residuals^2)
+abline(h=4, col=2, lty=2)
+
+require(car)
+ncvTest(step_centered_model_final) # p value to small ( reject the constant variance , thus the assumsion of homoskecasity is violated 
+summary(step_centered_model_final)
+levene.test(step_centered_model_final)
+
+
+# INDEPENDENCE 
+
+require(randtests)
+require(lmtest)
+require(car)
+durbinWatsonTest(step_centered_model_final)
+runs.test(step_centered_model_final$residuals)
+dwtest(step_centered_model_final)
+plot(rstudent(step_centered_model_final),type = "l")
+
+
+#there is independence of the erros , we dont reject the null hypothesis 
+
+####################################
+
+
+
+# FIXING THE PROBLEMS OF HOMOSCEDASITY AND LINEARITY BY APPLYING  LOG TRANSFORMATIONS
+
+
+#SETTING UP THE LOG MODEL 
+
+
+class(step_centered_model_final)
+step_centered_model_final
+
+logmodel <- lm(log(PRICE)~.-AGE,data=centered_covariates)
+
+
+plot(logmodel,which = 2)
+
+
+require(nortest)
+
+lillie.test(logmodel$residuals)
+
+shapiro.test(logmodel$residuals)
+
+
+#in both test pvalue is very large so we don't reject normality on residuals
+
+
+#LINEARITY 
+
+
+require(car)
+
+par(mfrow=c(1,1))
+
+residualPlot(logmodel,type='rstudent')
+residualPlots(logmodel,plot=F,type='rstudent')
+
+
+
+#HOMOSCEDASITY 
+
+Stud.residuals <- rstudent(logmodel)
+yhat <- fitted(logmodel)
+par(mfrow=c(1,2))
+plot(yhat, Stud.residuals)# observing the plots we see that oute of the dotted lines there are observations , that means we proppbaly do not have a constant variance 
+abline(h=c(-2,2), col=2, lty=2)
+plot(yhat, Stud.residuals^2)
+abline(h=4, col=2, lty=2)
+
+require(car)
+ncvTest(logmodel) # p value to big enough (  not reject the constant variance with log model  , thus the assumsion of homoskecasity is done)
+
+
+
+
+
+# INDEPENDENCE 
+
+require(randtests)
+require(lmtest)
+require(car); 
+durbinWatsonTest(logmodel)
+runs.test(logmodel$residuals)
+dwtest(logmodel)
+
+summary(logmodel)
+
+
+# ALL THE ASSUMPTION ENDED UP WITH A HIGH P VALUE SO THE ARE VALID AND WE ARE FINALLY DONE 
+
+
+
+# comparison between the two models , we choose the logmodel cause it has the assumptions valid 
+summary(step_centered_model_final)
+
+summary(logmodel)
+
+
+
+################ LASSO ############################################
+
+
+
+# we do lasso for the full model 
+
+
+require(glmnet)
+
+
+x <- model.matrix(full_model)[,-1]
+head(x,6)
+
+lasso <-glmnet(x,centered_covariates$PRICE)
+
+#1= SQFT
+#2 = AGE 
+#3=FEATS
+#4=NEyes
+#5=CORyes
+plot(lasso,xvar = "lambda", label = T) # ploting lasso techique
+
+# we see that the first coefficient that lasso aborts is the AGE for lambda ~ 2.5 , the second is NEyes for lambda ~ 2.1 , the third is CORyes for lambda ~ 3.2
+#and the last ones are the feats and the sqrt ( this is the same order with the stepwise AIC)
+
+#BETTER VISUALIZATION FOR THE LASSO PLOT
+require(plotmo)
+
+plot_glmnet(lasso)
+
+
+
+# CROSS VALIDATION TO CHOOSE LAMBDA
+
+lasso1 <- cv.glmnet(x,centered_covariates$PRICE, alpha = 1)
+
+plot(lasso1)
+lasso1$lambda.min
+lasso1$lambda.1se
+coef(lasso1, s = "lambda.min") # opou exei . exei fugei h metavliti 
+coef(lasso1, s = "lambda.1se")
+plot(lasso1$glmnet.fit, xvar = "lambda")
+abline(v=log(c(lasso1$lambda.min, lasso1$lambda.1se)), lty =2)
+
+# choosing the lambda$1se we end up into the same model as the stepwice procedure
+
+
+
+
+
+
+
+
+
